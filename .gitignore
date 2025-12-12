@@ -58,3 +58,6 @@ Thumbs.db
 *.sql
 backups/
 backup_db.py
+import_sqlite_data.py
+recalculate_tiers.py
+remove_games.py
