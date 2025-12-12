@@ -22,10 +22,10 @@ def recalculate_all_tiers():
             
             if old_tier != ach.rarity_tier:
                 updated += 1
-                if updated <= 10:  # Show first 10 changes
+                if updated <= 10:  
                     print(f"  Updated: {ach.name} - {old_tier} -> {ach.rarity_tier} ({ach.global_percentage}%)")
             
-            # Progress indicator
+            
             if (i + 1) % 1000 == 0:
                 print(f"  Progress: {i + 1}/{total}...")
         
@@ -33,8 +33,8 @@ def recalculate_all_tiers():
         db.session.commit()
         print(f"✓ Successfully updated {updated} achievements")
         
-        # Show new distribution
-        print(f"\n=== NEW TIER DISTRIBUTION ===")
+       
+        print(f"\nNEW TIER DISTRIBUTION ")
         gold_count = Achievement.query.filter_by(rarity_tier='gold').count()
         silver_count = Achievement.query.filter_by(rarity_tier='silver').count()
         bronze_count = Achievement.query.filter_by(rarity_tier='bronze').count()

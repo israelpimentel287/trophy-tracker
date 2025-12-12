@@ -44,7 +44,7 @@ def import_data():
                 db.session.add(user)
             
             db.session.commit()
-            print(f"✅ Imported {len(users)} users")
+            print(f"Imported {len(users)} users")
             
             # Import Games
             print("\nImporting games...")
@@ -70,9 +70,8 @@ def import_data():
                 db.session.add(game)
             
             db.session.commit()
-            print(f"✅ Imported {len(games)} games")
+            print(f"Imported {len(games)} games")
             
-            # Import Achievements
             print("\nImporting achievements...")
             cursor.execute("SELECT * FROM achievement")
             achievements = cursor.fetchall()
@@ -98,26 +97,25 @@ def import_data():
                 )
                 db.session.add(achievement)
             
-            # Commit in batches to avoid memory issues
             if len(achievements) > 1000:
                 print("Committing in batches...")
                 db.session.commit()
             
             db.session.commit()
-            print(f"✅ Imported {len(achievements)} achievements")
+            print(f"Imported {len(achievements)} achievements")
             
-            print("\n🎉 Import completed successfully!")
+            print("\n Import completed successfully!")
             
-            # Reset sequences for auto-increment
+            
             print("\nResetting PostgreSQL sequences...")
             db.session.execute(db.text("SELECT setval('user_id_seq', (SELECT MAX(id) FROM \"user\"))"))
             db.session.execute(db.text("SELECT setval('game_id_seq', (SELECT MAX(id) FROM game))"))
             db.session.execute(db.text("SELECT setval('achievement_id_seq', (SELECT MAX(id) FROM achievement))"))
             db.session.commit()
-            print("✅ Sequences reset")
+            print(" Sequences reset")
             
         except Exception as e:
-            print(f"❌ Error during import: {e}")
+            print(f" Error during import: {e}")
             db.session.rollback()
             raise
         
