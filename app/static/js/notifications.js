@@ -79,7 +79,6 @@ class NotificationPoller {
     showNotification(notification) {
         this.activeNotifications.add(notification.id);
 
-        // Play sound for platinum trophies
         if (notification.type === 'platinum_trophy') {
             const audio = new Audio('/static/sounds/platinum.mp3');
             audio.volume = 0.7;
