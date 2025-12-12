@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-user-cog me-2"></i>Profile Settings</h1>
+        <p class="text-muted">Manage your Steam account</p>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-info alert-custom">
+        <i class="fas fa-info-circle me-2"></i>{{ message }}
+    </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h5 class="mb-0">
+                    <i class="fab fa-steam me-2"></i>Steam Account
+                </h5>
+            </div>
+            <div class="settings-card-body">
+                {% if current_user.steam_id %}
+                <div class="steam-profile-info">
+                    <img src="{{ current_user.steam_avatar_url or '/static/images/default-avatar.png' }}" 
+                         alt="Steam Avatar" class="steam-avatar">
+                    <div class="steam-details">
+                        <h4>{{ current_user.steam_persona_name or current_user.username }}</h4>
+                        <p><strong>Steam ID:</strong> {{ current_user.steam_id }}</p>
+                        <p><strong>Last Sync:</strong> {{ current_user.last_sync.strftime('%Y-%m-%d %H:%M') if current_user.last_sync else 'Never' }}</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap mb-3">
+                    <a href="{{ current_user.steam_profile_url }}" target="_blank" class="btn btn-light btn-sm">
+                        <i class="fab fa-steam me-1"></i>View Steam Profile
+                    </a>
+                    <a href="{{ url_for('sync_api.sync_steam') }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-sync me-1"></i>Full Sync
+                    </a>
+                    <a href="{{ url_for('sync_api.sync_steam_quick') }}" class="btn btn-info btn-sm">
+                        <i class="fas fa-bolt me-1"></i>Quick Sync
+                    </a>
+                </div>
+                {% else %}
+                <div class="text-center mb-4">
+                    <i class="fab fa-steam" style="font-size: 48px; opacity: 0.7; margin-bottom: 16px;"></i>
+                    <h4>Steam Account Not Linked</h4>
+                    <p>Connect your Steam account to start tracking achievements</p>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('profile.update_steam_id') }}">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fab fa-steam"></i></span>
+                        <input type="text" class="form-control" name="steam_id" 
+                               placeholder="Enter Steam ID, profile URL, or custom username"
+                               value="{{ current_user.steam_id or '' }}">
+                        <button class="btn btn-light" type="submit">
+                            <i class="fas fa-save me-1"></i>Update
+                        </button>
+                    </div>
+                    <small class="form-text text-light mt-1">
+                        <i class="fas fa-info-circle me-1"></i>
+                        You can use your 17-digit Steam ID, Steam profile URL, or custom username
+                    </small>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Account Statistics
+                </h6>
+            </div>
+            <div class="settings-card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ current_user.games.count() }}</div>
+                            <div class="stat-label">Games</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ current_user.achievements.filter_by(unlocked=True).count() }}</div>
+                            <div class="stat-label">Trophies</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="d-grid gap-1">
+                        <a href="{{ url_for('trophies.trophies') }}" class="btn btn-outline-primary btn-sm">
+                            View All Trophies
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

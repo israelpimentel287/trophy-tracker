@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-sync-alt"></i>
+                Sync Status
+            </h2>
+            <div>
+                <a href="{{ url_for('trophies.trophies') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-trophy"></i> View Trophies
+                </a>
+                <a href="{{ url_for('games.games') }}" class="btn btn-outline-success">
+                    <i class="fas fa-gamepad"></i> View Games
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <span id="sync-type-icon" class="me-2">
+                        <i class="fas fa-hourglass-start"></i>
+                    </span>
+                    <span id="sync-title">Steam Sync</span>
+                </h5>
+                <div class="d-flex align-items-center">
+                    <span id="task-state-badge" class="badge bg-secondary me-2">Starting</span>
+                    <button id="cancel-btn" class="btn btn-sm btn-outline-danger" style="display: none;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span id="progress-text" class="text-muted">Preparing sync...</span>
+                        <span id="progress-percentage" class="fw-bold">0%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div id="current-status" class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            <span id="status-text">Initializing...</span>
+                        </div>
+                        <div id="current-game" class="text-primary mt-1" style="display: none;">
+                            <i class="fas fa-gamepad me-1"></i>
+                            <span id="game-name">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div id="eta-container" class="text-muted" style="display: none;">
+                            <i class="fas fa-hourglass-half me-1"></i>
+                            <span id="eta-text">-</span>
+                        </div>
+                        <div id="duration-container" class="text-info mt-1">
+                            <i class="fas fa-stopwatch me-1"></i>
+                            <span id="duration-text">0s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row text-center">
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2">
+                            <div class="h4 mb-0 text-success" id="synced-count">0</div>
+                            <small class="text-muted">Synced</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2">
+                            <div class="h4 mb-0 text-warning" id="skipped-count">0</div>
+                            <small class="text-muted">Skipped</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2">
+                            <div class="h4 mb-0 text-danger" id="failed-count">0</div>
+                            <small class="text-muted">Failed</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2">
+                            <div class="h4 mb-0 text-info" id="total-count">0</div>
+                            <small class="text-muted">Total</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="results-card" style="display: none;">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-check-circle"></i>
+                    Sync Complete
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="results-content"></div>
+            </div>
+        </div>
+
+        <div class="alert alert-danger" id="error-alert" style="display: none;">
+            <h6 class="alert-heading">
+                <i class="fas fa-exclamation-triangle"></i>
+                Sync Error
+            </h6>
+            <div id="error-message"></div>
+            <hr>
+            <div class="mb-0">
+                <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> Retry
+                </button>
+                <a href="{{ url_for('trophies.trophies') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-trophy"></i> Continue to Trophies
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.syncTaskId = '{{ task_id }}';
+    window.trophiesUrl = "{{ url_for('trophies.trophies') }}";
+</script>
+<script src="{{ url_for('static', filename='js/sync-status.js') }}"></script>
+{% endblock %}

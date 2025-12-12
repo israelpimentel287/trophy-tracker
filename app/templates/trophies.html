@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trophies.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>My Trophy Collection</h1>
+    {% if current_user.steam_id %}
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="syncDropdown">
+                Sync Options
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item sync-trigger" href="#" data-sync-type="quick" data-url="{{ url_for('sync_api.sync_steam_quick') }}">
+                    <i class="fas fa-bolt text-success"></i> Quick Sync (Top 20 Games)
+                </a></li>
+                <li><a class="dropdown-item sync-trigger" href="#" data-sync-type="full" data-url="{{ url_for('sync_api.sync_steam') }}">
+                    <i class="fas fa-sync text-primary"></i> Full Sync (All Games)
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><small class="dropdown-item-text text-muted">
+                    {% if current_user.last_sync %}
+                        Last sync: {{ current_user.last_sync.strftime('%B %d, %Y at %I:%M %p') }}
+                    {% else %}
+                        Never synced
+                    {% endif %}
+                </small></li>
+            </ul>
+        </div>
+    {% else %}
+        <span class="text-muted">Connect your Steam account to see trophies</span>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="syncProgressModal" tabindex="-1" aria-labelledby="syncProgressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="syncProgressModalLabel">
+                    <span id="syncTypeIcon"><i class="fas fa-sync"></i></span>
+                    <span id="syncTypeText">Steam Sync</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="syncCloseBtn" style="display: none;"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span id="syncStatus">Initializing sync...</span>
+                            <span id="syncPercentage" class="badge bg-primary">0%</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 id="syncProgressBar" 
+                                 style="width: 0%" 
+                                 aria-valuenow="0" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <span id="syncCurrent">0</span> of <span id="syncTotal">0</span> games processed
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="sync-stats">
+                            <div class="text-success small">
+                                <i class="bi bi-check-circle"></i> 
+                                <span id="gamesSynced">0</span> synced
+                            </div>
+                            <div class="text-warning small">
+                                <i class="bi bi-dash-circle"></i> 
+                                <span id="gamesSkipped">0</span> skipped
+                            </div>
+                            <div class="text-danger small">
+                                <i class="bi bi-x-circle"></i> 
+                                <span id="gamesFailed">0</span> failed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3" id="currentGameCard" style="display: none;">
+                    <div class="card-body py-2">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div>
+                                <strong>Currently Processing:</strong>
+                                <span id="currentGameName">Unknown Game</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="phase-indicator">
+                        <div class="phase-step active" data-phase="initialization">
+                            <div class="phase-icon">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="phase-label">Initialize</div>
+                        </div>
+                        <div class="phase-connector"></div>
+                        <div class="phase-step" data-phase="syncing">
+                            <div class="phase-icon">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="phase-label">Syncing</div>
+                        </div>
+                        <div class="phase-connector"></div>
+                        <div class="phase-step" data-phase="finalizing">
+                            <div class="phase-icon">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="phase-label">Finalizing</div>
+                        </div>
+                        <div class="phase-connector"></div>
+                        <div class="phase-step" data-phase="completed">
+                            <div class="phase-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="phase-label">Complete</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row text-center text-muted small">
+                    <div class="col-md-4">
+                        <div>Duration</div>
+                        <div id="syncDuration">0s</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div>Estimated Remaining</div>
+                        <div id="syncETA">Calculating...</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div>Rate</div>
+                        <div id="syncRate">- games/min</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="cancelSyncBtn" style="display: none;">
+                    Cancel Sync
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="completeSyncBtn" style="display: none;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <strong>Sync Update:</strong> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div id="activeSyncBar" class="alert alert-info" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <strong>Sync in Progress:</strong>
+            <span id="activeSyncStatus">Checking sync status...</span>
+        </div>
+        <div>
+            <button class="btn btn-sm btn-outline-primary" id="showSyncProgress">
+                View Progress
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center h-100 trophy-stat-card">
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="custom-trophy trophy-platinum trophy-xl"></div>
+                </div>
+                <h5 class="card-title">Platinum</h5>
+                <h2 class="display-4 trophy-platinum" id="platinumCount">{{ trophy_counts.platinum }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100 trophy-stat-card">
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="custom-trophy trophy-gold trophy-xl"></div>
+                </div>
+                <h5 class="card-title">Gold</h5>
+                <h2 class="display-4 trophy-gold" id="goldCount">{{ trophy_counts.gold }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100 trophy-stat-card">
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="custom-trophy trophy-silver trophy-xl"></div>
+                </div>
+                <h5 class="card-title">Silver</h5>
+                <h2 class="display-4 trophy-silver" id="silverCount">{{ trophy_counts.silver }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100 trophy-stat-card">
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="custom-trophy trophy-bronze trophy-xl"></div>
+                </div>
+                <h5 class="card-title">Bronze</h5>
+                <h2 class="display-4 trophy-bronze" id="bronzeCount">{{ trophy_counts.bronze }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h5>Total Trophies</h5>
+                        <h3 class="text-primary" id="totalTrophies">{{ trophy_counts.platinum + trophy_counts.gold + trophy_counts.silver + trophy_counts.bronze }}</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <h5>Trophy Level</h5>
+                        <h3 class="text-success" id="trophyLevel">{{ trophy_level }}</h3>
+                        <small class="text-muted">Based on trophy points</small>
+                    </div>
+                    <div class="col-md-3">
+                        <h5>Rarest Trophy</h5>
+                        {% if recent_achievements %}
+                            {% set rarest = recent_achievements|selectattr('rarity_tier', 'equalto', 'platinum')|list|first %}
+                            {% if rarest %}
+                                <h6 class="trophy-platinum" id="rarestTrophy">{{ rarest.name }}</h6>
+                                <small class="text-muted" id="rarestPercentage">{{ "%.1f"|format(rarest.global_percentage) }}% earned</small>
+                            {% else %}
+                                {% set rarest = recent_achievements|selectattr('rarity_tier', 'equalto', 'gold')|list|first %}
+                                {% if rarest %}
+                                    <h6 class="trophy-gold" id="rarestTrophy">{{ rarest.name }}</h6>
+                                    <small class="text-muted" id="rarestPercentage">{{ "%.1f"|format(rarest.global_percentage) }}% earned</small>
+                                {% else %}
+                                    <h6 id="rarestTrophy">No rare trophies yet</h6>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <h6 id="rarestTrophy">No trophies yet</h6>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <h5>Completion Rate</h5>
+                        {% if current_user.achievements.count() > 0 %}
+                            {% set completion = (current_user.achievements.filter_by(unlocked=True).count() / current_user.achievements.count() * 100) %}
+                            <h3 class="text-info" id="completionRate">{{ "%.1f"|format(completion) }}%</h3>
+                        {% else %}
+                            <h3 class="text-muted" id="completionRate">0%</h3>
+                        {% endif %}
+                        <small class="text-muted">Overall progress</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Recent Achievements</h3>
+        {% if recent_achievements %}
+            <span class="badge bg-secondary">{{ recent_achievements|length }} recent</span>
+        {% endif %}
+    </div>
+    
+    <div id="achievementsContainer">
+        {% if recent_achievements %}
+            <div class="row">
+                {% for achievement in recent_achievements %}
+                    <div class="col-md-12 mb-3">
+                        <div class="trophy-card">
+                            <div class="row align-items-center">
+                                <div class="col-md-1 text-center">
+                                    {% if achievement.rarity_tier == 'platinum' %}
+                                        <div class="custom-trophy trophy-platinum trophy-large"></div>
+                                    {% elif achievement.rarity_tier == 'gold' %}
+                                        <div class="custom-trophy trophy-gold trophy-large"></div>
+                                    {% elif achievement.rarity_tier == 'silver' %}
+                                        <div class="custom-trophy trophy-silver trophy-large"></div>
+                                    {% else %}
+                                        <div class="custom-trophy trophy-bronze trophy-large"></div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    {% if achievement.icon_url %}
+                                        <img src="{{ achievement.icon_url }}" alt="Achievement Icon" class="img-fluid rounded" style="max-width: 64px; max-height: 64px;">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                            <i class="fas fa-gamepad text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-1">{{ achievement.name }}</h5>
+                                            <p class="mb-2 text-muted">{{ achievement.description }}</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <span class="badge bg-{{ 'warning' if achievement.rarity_tier == 'platinum' else 'primary' if achievement.rarity_tier == 'gold' else 'info' if achievement.rarity_tier == 'silver' else 'secondary' }}">
+                                                    {{ achievement.get_rarity_description() }}
+                                                </span>
+                                                <span class="badge bg-light text-dark">
+                                                    {{ "%.1f"|format(achievement.global_percentage) }}% earned
+                                                </span>
+                                                {% if achievement.unlock_time %}
+                                                    <span class="badge bg-success">
+                                                        {{ achievement.unlock_time.strftime('%b %d, %Y') }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">{{ achievement.game.name }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('games.games') }}" class="btn btn-outline-primary">
+                    View All Games & Achievements
+                </a>
+            </div>
+            
+        {% else %}
+            <div class="alert alert-info" id="noAchievementsAlert">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <div class="custom-trophy trophy-platinum trophy-xl"></div>
+                    </div>
+                    <div class="col-md-10">
+                        <h5>No achievements yet!</h5>
+                        <p class="mb-2">Connect your Steam account and sync your data to see your trophy collection.</p>
+                        {% if current_user.steam_id %}
+                            <button class="btn btn-primary btn-sm sync-trigger" data-sync-type="quick" data-url="{{ url_for('sync_steam_quick') }}">
+                                <i class="fas fa-bolt"></i> Quick Sync Now
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm sync-trigger" data-sync-type="full" data-url="{{ url_for('sync_api.sync_steam') }}">
+                                <i class="fas fa-sync"></i> Full Sync
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('profile.profile') }}" class="btn btn-primary btn-sm">
+                                Add Steam ID
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if not current_user.steam_id %}
+    <div class="alert alert-warning mt-4">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem;"></i>
+            </div>
+            <div class="col-md-10">
+                <h5>Connect Your Steam Account</h5>
+                <p class="mb-2">To start tracking your achievements as trophies, please add your Steam ID to your profile.</p>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('profile.profile') }}" class="btn btn-primary">
+                        Update Profile
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary">
+                        Need Help Finding Steam ID?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if current_user.steam_id and not recent_achievements %}
+    <div class="alert alert-light border mt-4">
+        <h6>Sync Help</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Quick Sync</strong>
+                <ul class="small mb-0">
+                    <li>Syncs your top 20 most-played games</li>
+                    <li>Faster, good for checking recent progress</li>
+                    <li>Takes 1-2 minutes</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <strong>Full Sync</strong>
+                <ul class="small mb-0">
+                    <li>Syncs all games in your Steam library</li>
+                    <li>Complete trophy collection update</li>
+                    <li>Takes 5-10 minutes for large libraries</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/trophies.js') }}"></script>
+{% endblock %}

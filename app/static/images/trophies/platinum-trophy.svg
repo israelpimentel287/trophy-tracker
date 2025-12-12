@@ -1,0 +1,33 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="platinumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f0f0f0"/>
+            <stop offset="50%" style="stop-color:#e6e6fa"/>
+            <stop offset="100%" style="stop-color:#d3d3d3"/>
+        </linearGradient>
+        <linearGradient id="basePlat" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#b8b8b8"/>
+            <stop offset="100%" style="stop-color:#9a9a9a"/>
+        </linearGradient>
+    </defs>
+    
+    <!-- Trophy Base -->
+    <rect x="35" y="75" width="30" height="15" rx="3" fill="url(#basePlat)"/>
+    <rect x="30" y="85" width="40" height="8" rx="4" fill="#777"/>
+    
+    <!-- Trophy Stem -->
+    <rect x="47" y="65" width="6" height="15" fill="url(#basePlat)"/>
+    
+    <!-- Trophy Handles -->
+    <path d="M25 45 Q20 40 20 50 Q20 60 25 55" stroke="url(#platinumGrad)" stroke-width="4" fill="none"/>
+    <path d="M75 45 Q80 40 80 50 Q80 60 75 55" stroke="url(#platinumGrad)" stroke-width="4" fill="none"/>
+    
+    <!-- Trophy Cup -->
+    <path d="M30 65 L30 35 Q30 25 50 25 Q70 25 70 35 L70 65 Q70 70 50 70 Q30 70 30 65" fill="url(#platinumGrad)"/>
+    
+    <!-- Highlight -->
+    <ellipse cx="45" cy="40" rx="8" ry="12" fill="rgba(255,255,255,0.3)"/>
+    
+    <!-- Star decoration -->
+    <polygon points="50,45 52,50 57,50 53,53 55,58 50,55 45,58 47,53 43,50 48,50" fill="rgba(255,255,255,0.8)"/>
+</svg>

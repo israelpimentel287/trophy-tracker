@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="dashboard">
+    <header class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p>Track your Steam achievements in trophy format</p>
+    </header>
+
+    <div class="dashboard-grid">
+        <section class="card quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="actions">
+                <a href="{{ url_for('trophies.trophies') }}" class="btn btn-primary">
+                    <i class="fas fa-trophy"></i>
+                    View Trophies
+                </a>
+                <a href="{{ url_for('games.games') }}" class="btn btn-secondary">
+                    <i class="fas fa-gamepad"></i>
+                    Browse Games
+                </a>
+            </div>
+        </section>
+
+        <section class="card trophy-stats">
+            <h2>Trophy Stats</h2>
+            <div class="stats-grid">
+                <div class="stat">
+                    <span class="stat-label">Platinum</span>
+                    <span class="stat-value">{{ trophy_counts.platinum if trophy_counts else 0 }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Gold</span>
+                    <span class="stat-value">{{ trophy_counts.gold if trophy_counts else 0 }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Silver</span>
+                    <span class="stat-value">{{ trophy_counts.silver if trophy_counts else 0 }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Bronze</span>
+                    <span class="stat-value">{{ trophy_counts.bronze if trophy_counts else 0 }}</span>
+                </div>
+            </div>
+            <div class="total">
+                <span class="total-count">{{ total_trophies if total_trophies else 0 }}</span>
+                <span class="total-label">Total Trophies</span>
+            </div>
+        </section>
+
+        <section class="card progress">
+            <h2>Progress</h2>
+            
+            <div class="trophy-level-section">
+                <div class="level-info">
+                    <i class="fas fa-star level-icon"></i>
+                    <div>
+                        <span class="level-label">Trophy Level</span>
+                        <span class="level-value">{{ trophy_level }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="completion-section">
+                <div class="completion-header">
+                    <span class="completion-label">Overall Completion</span>
+                    <span class="completion-percentage">{{ avg_completion }}%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: {{ avg_completion }}%"></div>
+                </div>
+            </div>
+
+            <div class="progress-stats-grid">
+                <div class="progress-stat">
+                    <span class="progress-stat-value">{{ total_games }}</span>
+                    <span class="progress-stat-label">Total Games</span>
+                </div>
+                <div class="progress-stat">
+                    <span class="progress-stat-value">{{ games_with_trophies }}</span>
+                    <span class="progress-stat-label">With Trophies</span>
+                </div>
+            </div>
+
+            <div class="trophy-breakdown">
+                <div class="breakdown-item platinum-item">
+                    <span class="breakdown-count">{{ trophy_counts.platinum if trophy_counts else 0 }}</span>
+                    <span class="breakdown-label">Platinum</span>
+                </div>
+                <div class="breakdown-item gold-item">
+                    <span class="breakdown-count">{{ trophy_counts.gold if trophy_counts else 0 }}</span>
+                    <span class="breakdown-label">Gold</span>
+                </div>
+                <div class="breakdown-item silver-item">
+                    <span class="breakdown-count">{{ trophy_counts.silver if trophy_counts else 0 }}</span>
+                    <span class="breakdown-label">Silver</span>
+                </div>
+                <div class="breakdown-item bronze-item">
+                    <span class="breakdown-count">{{ trophy_counts.bronze if trophy_counts else 0 }}</span>
+                    <span class="breakdown-label">Bronze</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

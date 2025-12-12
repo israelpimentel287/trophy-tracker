@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game-trophies.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="game-trophy-view">
+    <div class="game-header">
+        <div class="game-header-content">
+            <div class="game-icon-large">
+                {% if game.header_image %}
+                    <img src="{{ game.header_image }}" alt="{{ game.name }}" class="game-header-image">
+                {% else %}
+                    <div class="game-icon-placeholder-large">
+                        <i class="bi bi-controller"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="game-info">
+                <h1 class="game-title">{{ game.name }}</h1>
+                <div class="game-stats">
+                    <div class="completion-info">
+                        <span class="completion-percentage">{{ "%.1f"|format(completion_rate) }}%</span>
+                        <span class="completion-text">Complete</span>
+                    </div>
+                    <div class="trophy-progress">
+                        {{ unlocked_count }}/{{ total_count }} Trophies
+                    </div>
+                </div>
+                
+                <div class="trophy-summary">
+                    <div class="trophy-summary-item">
+                        <div class="custom-trophy trophy-platinum trophy-small"></div>
+                        <span class="trophy-summary-count">{{ trophy_counts.platinum }}</span>
+                    </div>
+                    <div class="trophy-summary-item">
+                        <div class="custom-trophy trophy-gold trophy-small"></div>
+                        <span class="trophy-summary-count">{{ trophy_counts.gold }}</span>
+                    </div>
+                    <div class="trophy-summary-item">
+                        <div class="custom-trophy trophy-silver trophy-small"></div>
+                        <span class="trophy-summary-count">{{ trophy_counts.silver }}</span>
+                    </div>
+                    <div class="trophy-summary-item">
+                        <div class="custom-trophy trophy-bronze trophy-small"></div>
+                        <span class="trophy-summary-count">{{ trophy_counts.bronze }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-bar-compact">
+            <div class="progress-fill-compact" style="width: {{ completion_rate }}%"></div>
+        </div>
+        
+        <div class="trophy-nav">
+            <a href="{{ url_for('games.games') }}" class="nav-back">
+                <i class="bi bi-arrow-left"></i> Back to Games
+            </a>
+            <div class="nav-filters">
+                <button class="filter-btn-compact active" data-filter="all">All</button>
+                <button class="filter-btn-compact" data-filter="unlocked">Unlocked</button>
+                <button class="filter-btn-compact" data-filter="locked">Locked</button>
+                <button class="filter-btn-compact" data-filter="platinum">Platinum</button>
+                <button class="filter-btn-compact" data-filter="gold">Gold</button>
+                <button class="filter-btn-compact" data-filter="silver">Silver</button>
+                <button class="filter-btn-compact" data-filter="bronze">Bronze</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="trophy-list-compact">
+        {% for achievement in achievements %}
+            <div class="trophy-entry {{ 'unlocked' if achievement.unlocked else 'locked' }}" 
+                 data-rarity="{{ achievement.rarity_tier or 'bronze' }}"
+                 data-filter-category="{{ achievement.rarity_tier or 'bronze' }}">
+                
+                <div class="trophy-icon-container">
+                    {% if achievement.unlocked %}
+                        <div class="custom-trophy trophy-{{ achievement.rarity_tier or 'bronze' }} trophy-medium"></div>
+                    {% else %}
+                        <div class="trophy-locked">
+                            <i class="bi bi-lock-fill"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="achievement-icon-container">
+                    {% if achievement.icon_url %}
+                        <img src="{{ achievement.icon_url if achievement.unlocked else (achievement.icon_gray_url or achievement.icon_url) }}" 
+                             alt="{{ achievement.name }}" 
+                             class="achievement-icon {{ 'grayscale' if not achievement.unlocked else '' }}">
+                    {% else %}
+                        <div class="achievement-icon-placeholder {{ 'locked' if not achievement.unlocked else '' }}">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="achievement-details">
+                    <div class="achievement-name">{{ achievement.name }}</div>
+                    <div class="achievement-description">{{ achievement.description or 'Hidden achievement' }}</div>
+                    <div class="achievement-meta">
+                        {% if achievement.unlocked and achievement.unlock_time %}
+                            <span class="unlock-time">
+                                <i class="bi bi-calendar-check"></i>
+                                Unlocked {{ achievement.unlock_time.strftime('%m/%d/%Y at %I:%M %p') }}
+                            </span>
+                        {% endif %}
+                        {% if achievement.global_percentage %}
+                            <span class="rarity-info">
+                                <i class="bi bi-people"></i>
+                                {{ "%.1f"|format(achievement.global_percentage) }}% of players
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="status-indicator">
+                    {% if achievement.unlocked %}
+                        <div class="status-unlocked">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    {% else %}
+                        <div class="status-locked">
+                            <i class="bi bi-lock-fill"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if not achievements %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-trophy"></i>
+            </div>
+            <h3>No Achievements Found</h3>
+            <p>This game doesn't have any achievements or they haven't been synced yet.</p>
+            <a href="{{ url_for('games.games') }}" class="btn btn-primary">
+                Back to games
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game-trophies.js') }}"></script>
+{% endblock %}

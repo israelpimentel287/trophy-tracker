@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/games.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="games-title">My Games</h1>
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-muted">{{ games_data|length }} games in library</span>
+        {% if current_user.steam_id %}
+            <a href="{{ url_for('trophies.trophies') }}" class="btn btn-outline-primary btn-sm">
+                View Trophy Collection
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% set total_games = games_data|length %}
+{% set games_with_trophies = games_data|selectattr('total_unlocked', 'greaterthan', 0)|list|length %}
+{% set avg_completion = (games_data|selectattr('completion_rate')|map(attribute='completion_rate')|sum / games_data|selectattr('completion_rate')|list|length) if games_data|selectattr('completion_rate')|list|length > 0 else 0 %}
+{% set total_trophies = games_data|map(attribute='total_unlocked')|sum %}
+
+<div class="stats-grid mb-4">
+    <div class="stat-card">
+        <div class="stat-number text-primary">{{ total_games }}</div>
+        <div class="stat-label">Total Games</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number text-success">{{ games_with_trophies }}</div>
+        <div class="stat-label">Games with Trophies</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number text-info">{{ "%.0f"|format(avg_completion) }}%</div>
+        <div class="stat-label">Average Completion</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number text-warning">{{ total_trophies }}</div>
+        <div class="stat-label">Total Trophies</div>
+    </div>
+</div>
+
+<div class="filter-controls mb-4">
+    <span class="me-3">Sort by:</span>
+    <button class="btn filter-btn active" data-sort="recent">Recent Activity</button>
+    <button class="btn filter-btn" data-sort="alphabetical">Alphabetical</button>
+    <button class="btn filter-btn" data-sort="completion">Completion %</button>
+    <button class="btn filter-btn" data-sort="trophies">Trophy Count</button>
+    <span class="ms-4 me-3">Filter:</span>
+    <button class="btn filter-btn active" data-filter="all">All Games</button>
+    <button class="btn filter-btn" data-filter="progress">In Progress</button>
+    <button class="btn filter-btn" data-filter="completed">Completed</button>
+    <button class="btn filter-btn" data-filter="unstarted">Not Started</button>
+</div>
+
+{% if games_data %}
+    <div class="game-list">
+        {% for game_info in games_data %}
+            <div class="game-card" 
+                 data-completion="{{ game_info.completion_rate or 0 }}" 
+                 data-trophies="{{ game_info.total_unlocked }}"
+                 data-name="{{ game_info.game.name|lower }}"
+                 data-game-id="{{ game_info.game.id }}"
+                 data-filter-category="{% if (game_info.completion_rate or 0) == 100 %}completed{% elif (game_info.completion_rate or 0) > 0 %}progress{% else %}unstarted{% endif %}">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        {% if game_info.game.header_image %}
+                            <img src="{{ game_info.game.header_image }}" alt="{{ game_info.game.name }}" class="game-icon">
+                        {% else %}
+                            <div class="game-icon-placeholder">
+                                <i class="bi bi-controller" style="font-size: 2rem; color: #666;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        <div class="game-title">{{ game_info.game.name }}</div>
+                        <div class="game-progress">
+                            {{ "%.1f"|format(game_info.completion_rate or 0) }}% Complete
+                            {% if game_info.total_available > 0 %}
+                                ({{ game_info.total_unlocked }}/{{ game_info.total_available }} achievements)
+                            {% endif %}
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: {{ game_info.completion_rate or 0 }}%"></div>
+                        </div>
+                        {% if game_info.game.last_played %}
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> 
+                                Last played: {{ game_info.game.last_played.strftime('%b %d, %Y') }}
+                            </small>
+                        {% endif %}
+                    </div>
+                    <div class="col-auto">
+                        <div class="trophy-counts">
+                            <div class="trophy-count-item">
+                                <div class="custom-trophy trophy-platinum trophy-medium"></div>
+                                <div class="trophy-count-number platinum">{{ game_info.trophy_counts.platinum }}</div>
+                            </div>
+                            <div class="trophy-count-item">
+                                <div class="custom-trophy trophy-gold trophy-medium"></div>
+                                <div class="trophy-count-number gold">{{ game_info.trophy_counts.gold }}</div>
+                            </div>
+                            <div class="trophy-count-item">
+                                <div class="custom-trophy trophy-silver trophy-medium"></div>
+                                <div class="trophy-count-number silver">{{ game_info.trophy_counts.silver }}</div>
+                            </div>
+                            <div class="trophy-count-item">
+                                <div class="custom-trophy trophy-bronze trophy-medium"></div>
+                                <div class="trophy-count-number bronze">{{ game_info.trophy_counts.bronze }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-click-hint">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <i class="bi bi-controller" style="font-size: 3rem;"></i>
+            </div>
+            <div class="col-md-10">
+                <h5>No games found!</h5>
+                <p class="mb-2">Your Steam library appears to be empty or hasn't been synced yet.</p>
+                {% if current_user.steam_id %}
+                    <a href="{{ url_for('trophies.trophies') }}" class="btn btn-primary btn-sm">
+                        Sync Steam Library
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('profile.profile') }}" class="btn btn-primary btn-sm">
+                        Add Steam ID
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if not current_user.steam_id %}
+    <div class="alert alert-warning mt-4">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <i class="bi bi-exclamation-triangle" style="font-size: 2.5rem;"></i>
+            </div>
+            <div class="col-md-10">
+                <h5>Connect Your Steam Account</h5>
+                <p class="mb-2">To view your games and track achievements as trophies, please add your Steam ID to your profile.</p>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('profile.profile') }}" class="btn btn-primary">
+                        Update Profile
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary">
+                        Need Help Finding Steam ID?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/games.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,347 @@
+.progress-notification {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 2px solid #4a90e2;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 10px 0;
+    position: sticky;
+    top: 80px;
+    z-index: 1000;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.progress-header h4 {
+    color: white;
+    margin: 0;
+    font-size: 18px;
+}
+
+.progress-bar-container {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4aa, #00b894);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.milestone-achievement {
+    border: 3px solid gold;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+    animation: milestone-glow 2s infinite alternate;
+}
+
+.rare-achievement-alert {
+    border: 3px solid #ff6b6b;
+    box-shadow: 0 0 40px rgba(255, 107, 107, 0.7);
+    animation: rare-achievement-pulse 1.5s infinite;
+}
+
+.volume-control {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    border: 2px solid #718096;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.volume-control:hover {
+    border-color: #4a90e2;
+    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.2);
+    transition: all 0.3s ease;
+}
+
+.mute-button, .unmute-button {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+}
+
+.unmute-button {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+    box-shadow: 0 2px 8px rgba(56, 161, 105, 0.3);
+}
+
+.mute-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.5);
+}
+
+.unmute-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.5);
+}
+
+.mute-button:active, .unmute-button:active {
+    transform: scale(0.95);
+}
+
+.volume-slider {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.volume-slider::-moz-range-track {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    border: none;
+}
+
+.volume-level-indicator {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-width: 60px;
+}
+
+.volume-bar {
+    width: 3px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.volume-bar.active {
+    background: linear-gradient(135deg, #00d4aa, #00b894);
+    box-shadow: 0 0 4px rgba(0, 212, 170, 0.4);
+}
+
+.volume-bar:nth-child(1) { height: 8px; }
+.volume-bar:nth-child(2) { height: 10px; }
+.volume-bar:nth-child(3) { height: 12px; }
+.volume-bar:nth-child(4) { height: 14px; }
+.volume-bar:nth-child(5) { height: 16px; }
+
+.sound-preferences {
+    background: linear-gradient(135deg, #553c9a 0%, #3c4142 100%);
+    border: 2px solid #805ad5;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 6px 20px rgba(85, 60, 154, 0.2);
+}
+
+.sound-preferences h3 {
+    color: white;
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sound-preference-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sound-preference-item:last-child {
+    border-bottom: none;
+}
+
+.sound-preference-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    flex: 1;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.toggle-switch.active {
+    background: linear-gradient(135deg, #00d4aa, #00b894);
+    box-shadow: 0 0 10px rgba(0, 212, 170, 0.3);
+}
+
+.toggle-switch-handle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.active .toggle-switch-handle {
+    transform: translateX(24px);
+}
+
+.progress-header .volume-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    margin: 0;
+    border-radius: 8px;
+    gap: 8px;
+}
+
+.progress-header .mute-button,
+.progress-header .unmute-button {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+}
+
+.progress-header .volume-slider {
+    width: 80px;
+    height: 6px;
+}
+
+@keyframes milestone-glow {
+    0% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+    100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.8); }
+}
+
+@keyframes rare-achievement-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(255, 107, 107, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(255, 107, 107, 1); }
+}
+
+.audio-feedback {
+    position: relative;
+    overflow: hidden;
+}
+
+.audio-feedback::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: audio-wave 2s infinite;
+}
+
+@keyframes audio-wave {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@media (max-width: 768px) {
+    .volume-control {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .volume-slider {
+        width: 100%;
+    }
+    
+    .progress-header .volume-control {
+        display: none;
+    }
+    
+    .sound-preferences {
+        padding: 15px;
+    }
+}
+
+.game-update-pulse {
+    animation: game-update-pulse 0.6s ease-out;
+}
+
+.trophy-count-update {
+    animation: trophy-count-update 1s ease-out;
+}
+
+@keyframes game-update-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); background-color: rgba(255,255,255,0.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes trophy-count-update {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); color: #ffd700; }
+    50% { transform: scale(1.1); color: #ffd700; }
+    100% { transform: scale(1); }
+}
