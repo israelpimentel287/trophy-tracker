@@ -28,7 +28,7 @@ def get_unread_notifications():
             Notification.created_at.desc()
         ).all()
         
-        # Convert to JSON-friendly format
+        # Convert to JSON
         notifications_data = []
         for notification in notifications:
             notifications_data.append({
@@ -76,7 +76,7 @@ def mark_notification_read(notification_id):
                 'error': 'Notification not found'
             }), 404
         
-        # Mark as read using the model's method
+        # Mark as read 
         notification.mark_read()
         db.session.commit()
         
@@ -115,7 +115,6 @@ def dismiss_notification(notification_id):
                 'error': 'Notification not found'
             }), 404
         
-        # Mark as dismissed using the model's method
         notification.mark_dismissed()
         db.session.commit()
         
