@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="alert alert-info text-center mb-4">
+    <h4 class="mb-2"><i class="fas fa-eye"></i> Demo Mode - Read Only</h4>
+    <p class="mb-3">You're viewing <strong>{{ demo_user.username }}</strong>'s trophy collection</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Create Your Own Account
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+    </div>
+</div>
+
+<main class="dashboard">
+    <header class="dashboard-header">
+        <h1>Trophy Tracker Demo</h1>
+        <p>Sample trophy tracking dashboard</p>
+    </header>
+
+    <div class="dashboard-grid">
+        <section class="card quick-actions">
+            <h2>Demo Features</h2>
+            <div class="actions">
+                <p class="text-muted mb-3">This is a read-only demo. Create an account to track your own Steam achievements!</p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    Sign Up Free
+                </a>
+            </div>
+        </section>
+
+        <section class="card trophy-stats">
+            <h2>Trophy Stats</h2>
+            <div class="stats-grid">
+                <div class="stat">
+                    <span class="stat-label">Platinum</span>
+                    <span class="stat-value">{{ trophy_counts.platinum }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Gold</span>
+                    <span class="stat-value">{{ trophy_counts.gold }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Silver</span>
+                    <span class="stat-value">{{ trophy_counts.silver }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Bronze</span>
+                    <span class="stat-value">{{ trophy_counts.bronze }}</span>
+                </div>
+            </div>
+            <div class="total">
+                <span class="total-count">{{ total_trophies }}</span>
+                <span class="total-label">Total Trophies</span>
+            </div>
+        </section>
+
+        <section class="card progress">
+            <h2>Progress</h2>
+            
+            <div class="trophy-level-section">
+                <div class="level-info">
+                    <i class="fas fa-star level-icon"></i>
+                    <div>
+                        <span class="level-label">Trophy Level</span>
+                        <span class="level-value">{{ trophy_level }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="completion-section">
+                <div class="completion-header">
+                    <span class="completion-label">Overall Completion</span>
+                    <span class="completion-percentage">{{ avg_completion }}%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: {{ avg_completion }}%"></div>
+                </div>
+            </div>
+
+            <div class="progress-stats-grid">
+                <div class="progress-stat">
+                    <span class="progress-stat-value">{{ total_games }}</span>
+                    <span class="progress-stat-label">Total Games</span>
+                </div>
+                <div class="progress-stat">
+                    <span class="progress-stat-value">{{ games_with_trophies }}</span>
+                    <span class="progress-stat-label">With Trophies</span>
+                </div>
+            </div>
+
+            <div class="trophy-breakdown">
+                <div class="breakdown-item platinum-item">
+                    <span class="breakdown-count">{{ trophy_counts.platinum }}</span>
+                    <span class="breakdown-label">Platinum</span>
+                </div>
+                <div class="breakdown-item gold-item">
+                    <span class="breakdown-count">{{ trophy_counts.gold }}</span>
+                    <span class="breakdown-label">Gold</span>
+                </div>
+                <div class="breakdown-item silver-item">
+                    <span class="breakdown-count">{{ trophy_counts.silver }}</span>
+                    <span class="breakdown-label">Silver</span>
+                </div>
+                <div class="breakdown-item bronze-item">
+                    <span class="breakdown-count">{{ trophy_counts.bronze }}</span>
+                    <span class="breakdown-label">Bronze</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    {% if recent_achievements %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3 class="mb-0">Recent Achievements</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for achievement in recent_achievements[:5] %}
+                <div class="col-md-12 mb-3">
+                    <div class="d-flex align-items-center p-3 border rounded">
+                        <div class="me-3">
+                            {% if achievement.icon_url %}
+                            <img src="{{ achievement.icon_url }}" alt="{{ achievement.name }}" class="rounded" style="width: 48px; height: 48px;">
+                            {% else %}
+                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="fas fa-trophy text-white"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ achievement.name }}</h6>
+                            <p class="text-muted mb-1 small">{{ achievement.description }}</p>
+                            <small class="text-muted">
+                                {{ achievement.game.name if achievement.game else 'Unknown Game' }}
+                                {% if achievement.unlock_time %}
+                                - {{ achievement.unlock_time.strftime('%b %d, %Y') }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ 'warning' if achievement.rarity_tier == 'platinum' else 'primary' if achievement.rarity_tier == 'gold' else 'info' if achievement.rarity_tier == 'silver' else 'secondary' }}">
+                                {{ achievement.rarity_tier|capitalize }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if sample_games %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3 class="mb-0">Sample Games</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for game in sample_games %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            {% if game.header_image %}
+                            <img src="{{ game.header_image }}" alt="{{ game.name }}" class="img-fluid mb-3 rounded">
+                            {% endif %}
+                            <h6 class="card-title">{{ game.name }}</h6>
+                            <p class="text-muted small mb-2">
+                                {% set total_achievements = game.achievements.filter_by(user_id=demo_user.id).count() %}
+                                {% set unlocked_achievements = game.achievements.filter_by(user_id=demo_user.id, unlocked=True).count() %}
+                                {% if total_achievements > 0 %}
+                                {{ unlocked_achievements }}/{{ total_achievements }} achievements
+                                {% else %}
+                                No achievements
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="alert alert-success mt-4 text-center">
+        <h5 class="mb-3">Ready to Track Your Own Trophies?</h5>
+        <p class="mb-3">Create a free account and connect your Steam profile to start tracking your achievements!</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-trophy"></i> Get Started Now
+        </a>
+    </div>
+</main>
+{% endblock %}

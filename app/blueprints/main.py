@@ -98,3 +98,79 @@ def get_stats():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@main_bp.route('/demo')
+def demo():
+    """Public demo page showing sample trophy data without login."""
+    from app.models import User
+        
+    demo_user = User.query.filter_by(username='voltisreal').first()
+        
+    if not demo_user:
+        return render_template('demo_unavailable.html', 
+                            title='Demo Unavailable',
+                            message='Demo account not found')
+        
+    try:
+        trophy_counts = demo_user.get_trophy_counts()
+            
+        total_trophies = sum(trophy_counts.values())
+        total_games = Game.query.filter_by(user_id=demo_user.id).count()
+            
+        games_with_trophies = db.session.query(Achievement.game_id).filter(
+            Achievement.user_id == demo_user.id,
+            Achievement.unlocked == True
+        ).distinct().count()
+            
+        avg_completion = 0
+        if total_games > 0:
+            game_completions = db.session.query(
+                Achievement.game_id,
+                func.count(Achievement.id).label('total'),
+                func.sum(func.cast(Achievement.unlocked, db.Integer)).label('unlocked')
+            ).filter(
+                Achievement.user_id == demo_user.id
+            ).group_by(Achievement.game_id).all()
+                
+            if game_completions:
+                completion_rates = []
+                for comp in game_completions:
+                    if comp.total > 0:
+                        unlocked_count = int(comp.unlocked) if comp.unlocked else 0
+                        rate = (unlocked_count / comp.total * 100)
+                        completion_rates.append(rate)
+                    
+                avg_completion = sum(completion_rates) / len(completion_rates) if completion_rates else 0
+            
+        trophy_level = demo_user.get_trophy_level()
+            
+        recent_achievements = Achievement.query.filter_by(
+            user_id=demo_user.id,
+            unlocked=True
+        ).order_by(Achievement.unlock_time.desc()).limit(10).all()
+            
+        sample_games = Game.query.filter_by(user_id=demo_user.id).limit(6).all()
+            
+        return render_template(
+            'demo.html',
+            title='Demo - Trophy Tracker',
+            demo_user=demo_user,
+            trophy_counts=trophy_counts,
+            total_trophies=total_trophies,
+            total_games=total_games,
+            games_with_trophies=games_with_trophies,
+            avg_completion=round(avg_completion, 1),
+            trophy_level=trophy_level,
+            recent_achievements=recent_achievements,
+            sample_games=sample_games,
+            is_demo=True
+        )
+            
+    except Exception as e:
+        print(f"Error loading demo: {e}")
+        import traceback
+        traceback.print_exc()
+            
+        return render_template('demo_unavailable.html',
+                            title='Demo Unavailable',
+                            message='Error loading demo data')

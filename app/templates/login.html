@@ -3,6 +3,14 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
+        <div class="alert alert-info text-center mb-4">
+            <h5 class="mb-2"><i class="fas fa-eye"></i> Want to see the app first?</h5>
+            <p class="mb-3">Check out our demo to see Trophy Tracker in action!</p>
+            <a href="{{ url_for('main.demo') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-play-circle"></i> View Live Demo
+            </a>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h3>Login</h3>
