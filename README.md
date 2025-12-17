@@ -166,6 +166,7 @@ Silver      10-25% of players           Silver
 Bronze      More than 25% of players    Bronze 
 
 ## Project Structure
+```
 trophy-tracker/
 ├── app/
 │   ├── blueprints/        # Routes (main, api, companion_api)
@@ -180,7 +181,8 @@ trophy-tracker/
 ├── Procfile               # Render config
 ├── requirements.txt       # Python packages
 └── runtime.txt            # Python version
-
+```
+s
 Contributing
 Want to help? Feel free to open a pull request!
 
