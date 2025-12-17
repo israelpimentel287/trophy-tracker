@@ -87,10 +87,11 @@ Install dependencies
 
 bashpip install -r requirements.txt
 
-Set up environment variables
+**Set up environment variables**
 
-Create a .env file:
-envSTEAM_API_KEY=your_steam_api_key
+Create a `.env` file:
+```env
+STEAM_API_KEY=your_steam_api_key
 SECRET_KEY=your_secret_key
 DATABASE_URL=postgresql://user:password@localhost:5432/trophy_tracker
 REDIS_URL=redis://localhost:6379/0
@@ -99,6 +100,7 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/1
 REDIS_NOTIFICATION_URL=redis://localhost:6379/2
 TROPHY_NOTIFICATIONS_ENABLED=True
 NOTIFICATION_DEBUG_MODE=False
+```
 
 Set up the database
 
@@ -111,59 +113,75 @@ bashdocker run -d -p 6379:6379 redis:latest
 Run the app
 
 You need THREE terminals:
-Terminal 1 - Web server:
-bashpython app.py
-Terminal 2 - Background worker:
-bashpython celery_worker.py --loglevel=info
-Terminal 3 - Task scheduler:
-bashcelery -A celery_worker beat --loglevel=info
+
+**Terminal 1 - Web server:**
+```bash
+python app.py
+```
+
+**Terminal 2 - Background worker:**
+```bash
+python celery_worker.py --loglevel=info
+```
+
+**Terminal 3 - Task scheduler:**
+```bash
+celery -A celery_worker beat --loglevel=info
+```
 
 Open your browser
 
 http://localhost:5000
 
-Deployment
+## Deployment
+
 Deployed on Render.com with:
+- Web service (Flask + Gunicorn)
+- PostgreSQL database
+- Redis instance
+- Celery background worker
 
-Web service (Flask + Gunicorn)
-PostgreSQL database
-Redis instance
-Celery background worker
+## Environment Variables for Production
 
-Environment Variables for Production
-SECRET_KEY              # Generate: python -c "import secrets; print(secrets.token_hex(32))"
-STEAM_API_KEY           # Your Steam API key
-DATABASE_URL            # From Render PostgreSQL
-REDIS_URL               # From Render Redis
-CELERY_BROKER_URL       # Same as REDIS_URL
-CELERY_RESULT_BACKEND   # REDIS_URL with /1
-REDIS_NOTIFICATION_URL  # REDIS_URL with /2
-TROPHY_NOTIFICATIONS_ENABLED=True
-NOTIFICATION_DEBUG_MODE=False
+| Variable                      | Description                                           |
+|-------------------------------|-------------------------------------------------------|
+| `SECRET_KEY`                  | Generate: `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `STEAM_API_KEY`               | Your Steam API key                                    |
+| `DATABASE_URL`                | From Render PostgreSQL                                |
+| `REDIS_URL`                   | From Render Redis                                     |
+| `CELERY_BROKER_URL`           | Same as REDIS_URL                                     |
+| `CELERY_RESULT_BACKEND`       | REDIS_URL with /1                                     |
+| `REDIS_NOTIFICATION_URL`      | REDIS_URL with /2                                     |
+| `TROPHY_NOTIFICATIONS_ENABLED`| True                                                  |
+| `NOTIFICATION_DEBUG_MODE`     | False   
 
 **Deployment Note:** The free tier supports the web app and demo perfectly. 
 Background syncing with Celery workers requires Render's paid plan ($7/month for 
 worker + $7/month for Redis = $14/month total).
 
-API Docs
-Endpoints
-All requests need an API key in the X-API-Key header.
-Get all achievements
-httpGET /api/achievements
-Get recent achievements
-httpGET /api/achievements/recent?limit=10
-Get your games
-httpGET /api/games
-Sync with Steam
-httpPOST /api/sync
+## API Docs
 
-Trophy Tiers
+### Endpoints
+
+All requests need an API key in the `X-API-Key` header.
+
+| Method | Endpoint                           | Description              |
+|--------|------------------------------------|--------------------------| 
+| GET    | `/api/achievements`                | Get all achievements     |
+| GET    | `/api/achievements/recent?limit=10`| Get recent achievements  |
+| GET    | `/api/games`                       | Get your games           |
+| POST   | `/api/sync`                        | Sync with Steam          |
+
+## Trophy Tiers
+
 Achievements are ranked by how rare they are:
-Tier        Rarity                      Icon
-Platinum    100% completion             Platinum
-Gold        1-10% of players            Gold 
-Silver      10-25% of players           Silver 
-Bronze      More than 25% of players    Bronze 
+
+| Tier     | Rarity                   |
+|----------|--------------------------|
+| Platinum | 100% completion          |
+| Gold     | 1-10% of players         |
+| Silver   | 10-25% of players        |
+| Bronze   | More than 25% of players |
 
 ## Project Structure
 ```
@@ -182,7 +200,7 @@ trophy-tracker/
 ├── requirements.txt       # Python packages
 └── runtime.txt            # Python version
 ```
-s
+
 Contributing
 Want to help? Feel free to open a pull request!
 
