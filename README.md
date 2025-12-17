@@ -165,7 +165,7 @@ Gold        1-10% of players            Gold
 Silver      10-25% of players           Silver 
 Bronze      More than 25% of players    Bronze 
 
-Project Structure
+## Project Structure
 trophy-tracker/
 ├── app/
 │   ├── blueprints/        # Routes (main, api, companion_api)
